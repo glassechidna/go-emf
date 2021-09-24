@@ -10,6 +10,7 @@ import (
 )
 
 var Namespace = "goemf"
+var LogGroupName = ""
 var Writer io.Writer = os.Stdout
 
 type MSI map[string]interface{}
@@ -34,7 +35,8 @@ func Emit(m MSI) {
 	}
 
 	raw["_aws"] = metadata{
-		Timestamp: int(time.Now().UnixNano() / 1e6),
+		Timestamp:    int(time.Now().UnixNano() / 1e6),
+		LogGroupName: LogGroupName,
 		CloudWatchMetrics: []cwMetricDirective{
 			{
 				Namespace:  Namespace,
@@ -67,6 +69,7 @@ func Dimension(value string) interface{} {
 
 type metadata struct {
 	Timestamp         int
+	LogGroupName      string `json:",omitempty"`
 	CloudWatchMetrics []cwMetricDirective
 }
 
