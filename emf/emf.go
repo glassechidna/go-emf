@@ -12,6 +12,7 @@ import (
 var Namespace = "goemf"
 var LogGroupName = ""
 var Writer io.Writer = os.Stdout
+var TimestampKey = "__goemfTimestampKey"
 
 type MSI map[string]interface{}
 
@@ -20,8 +21,14 @@ func Emit(m MSI) {
 	dimensions := []string{}
 
 	raw := map[string]interface{}{}
+	timestamp := time.Now()
 
 	for key, value := range m {
+		if key == TimestampKey {
+			timestamp = value.(time.Time)
+			continue
+		}
+
 		switch value := value.(type) {
 		case *metric:
 			raw[key] = value.Value
@@ -35,7 +42,7 @@ func Emit(m MSI) {
 	}
 
 	raw["_aws"] = metadata{
-		Timestamp:    int(time.Now().UnixNano() / 1e6),
+		Timestamp:    int(timestamp.UnixNano() / 1e6),
 		LogGroupName: LogGroupName,
 		CloudWatchMetrics: []cwMetricDirective{
 			{
